@@ -1,83 +1,83 @@
 ;Josher Ramírez Montoya B96368
-;Kevin Barboza 
-;Keylor Soto Delgado 
-
+;Kevin Barboza Ramírez  B80934
+;Keylor Soto Delgado    B97725
 
 section .data
-
-    mensaje: db "Hola"
-    tamano: equ $ - mensaje
+    
+    mensaje: db " " ;Valor de inicio de rsi
 
 section .text
 global _start
+
 _start:
+    mov rsi, mensaje ;Apunta a la dirección de mensaje
+    mov r8, 0 ;Offset utilizado para rsi
+    
+    mov rdx, 0 ;eliminar basura de edx  1280 
+    mov rax, 0 ;eliminar basura de eax
+    mov ax, 0x0000 ;número a imprimir 
+    mov bx,10 ;Valor en el que se divide el número para descomponerlo
 
-    mov rsi, 0
-    mov edx, 0 ;eliminar basura de edx
-    mov eax, 0 ;eliminar basura de eax
-    mov edi, -10000 ;primer divisor para descomponer el número
-    mov ax, 22780 ;número a imprimir
+    call verificar_signo 
 
-    call verificar_negativo 
 
-    call transformar
     call salir
 
 
-transformar: 
+;Divide el número de ax entre 10, el residuo será el digito a imprimir
+division: 
+    div bx  ;edx:eax/10  cociente: ax residuo: dx 
+    add dx, 0x30 ;Se le suma 0x30 al residuo para obtener el valor ASCII
+    mov r9w, ax ;Guarda los números restantes, el resultado de la división
+    push dx ;Guarda en la pila el carácter obtenido
+    inc rcx ;
+    mov rdx, 0 ;eliminar basura de edx
+    mov rax, 0 ;eliminar basura de eax              
+    mov ax, r9w 
 
-    cmp ax,10000
-    ja  descomponer 
+    cmp ax, 0
+    jne division
 
-    mov rdx, 1000
+    ;Saca los números de la pila y los pone en rsi
+    crear_num:
+        pop dx
+        mov [rsi+r8], dx
+        inc r8
+    loop crear_num
 
-    cmp ax,1000
-    ja  descomponer
-
-    mov rdx, 100
-
-    cmp ax,100
-    ja  descomponer
-
-    mov rdx, 10
-
-    cmp ax,10
-    ja descomponer
-
-    ret
-
-descomponer: 
-       
-    div edi  ;edx:eax/10000  coc: AX 2  res: DX 2780  30h+AX
-    add ax,30h
-    mov rsi,rax
-    call imprimir
-    mov ax,dx
-    ret
-
-verificar_negativo:
+    mov dx, 0xa
+    mov [rsi+r8], dx
+    inc r8
     
-    test ax, 0x8000
-    jz imprimir_negativo
-    neg ax
-    ret
 
-
-imprimir_negativo:
-
-    mov rsi, "-"
     call imprimir
-    ret
+    call salir
+ret
 
-salir:
-    mov rax, 60  
-    mov rdi, 0  
-    syscall
+;Verifica si el valor de ax es positivo o negativo
+verificar_signo:
+    test ax, 0x8000
+    jz division
+    call negativo
 
+;Coloca el signo "-" para ser impreso
+negativo:
+    mov r15w, 0x2d ; "-"
+    mov [rsi+r8], r15w
+    inc r8
+    neg ax
+    call division
+
+;Imprime el resultado que se encuentra en rsi
 imprimir: ;rsi
-    mov rdx, 2
-    mov rsi, rax
+    mov rdx, r8
     mov rax, 1 
     mov rdi, 1 
     syscall
     ret
+
+;Devuelve el control al SO
+salir:
+    mov rax, 60  
+    mov rdi, 0  
+    syscall
