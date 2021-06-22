@@ -15,7 +15,7 @@ _start:
     
     mov rdx, 0 ;eliminar basura de edx  1280 
     mov rax, 0 ;eliminar basura de eax
-    mov ax, 0x0000 ;número a imprimir 
+    mov ax, 0xe456 ;número a imprimir 
     mov bx,10 ;Valor en el que se divide el número para descomponerlo
 
     call verificar_signo 
