@@ -9,8 +9,6 @@ Random::~Random(){
 }
 
 float Random::getRandom(){
-    //usleep(2*10000); // <2 segundos
-    srand((unsigned) time(NULL));
-    randomNum = 1+rand()%MAX;
+    randomNum = rand()%100;
     return randomNum;
 }
